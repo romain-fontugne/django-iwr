@@ -42,7 +42,7 @@ def congestionData(request):
     asn = get_object_or_404(ASN, number=request.GET["asn"])
     data = Congestion.objects.filter(asn=asn.number)
     formatedData = {
-            "x": list(data.values_list("timeBin", flat=True)),
+            "x": list(data.values_list("timebin", flat=True)),
             "y": list(data.values_list("magnitude", flat=True))
             }
     return JsonResponse(formatedData, encoder=DateTimeEncoder) 
@@ -51,7 +51,7 @@ def forwardingData(request):
     asn = get_object_or_404(ASN, number=request.GET["asn"])
     data = Forwarding.objects.filter(asn=asn.number) 
     formatedData = {
-            "x": list(data.values_list("timeBin", flat=True)),
+            "x": list(data.values_list("timebin", flat=True)),
             "y": list(data.values_list("magnitude", flat=True))
             }
     return JsonResponse(formatedData, encoder=DateTimeEncoder) 
