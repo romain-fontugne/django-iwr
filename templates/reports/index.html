@@ -1,3 +1,23 @@
 {% extends "reports/base_reports.html" %}
 
 {% block errorMessage %}{% endblock %}
+
+{% block body %}
+<div class="row">
+    
+    <div class="col-12"><h2>Top ASes reported on the last 24 hours</h2></div>
+    <div class="col-3"></div>
+    <div class="col-9"></div>
+    <div class="col-3">
+        <h2>Monitored ASes</h2> 
+        <ul>
+        {% for asn in monitoredAsn %}
+        <li><a href="{% url "reports:asnDetail" asn.number %}">AS{{ asn.number }} {{ asn.name }}</a></li>
+        {% endfor %}
+        and <a href="{% url "reports:asnList" %}" >{{ nbMonitoredAsn }} more...</a>
+        </ul>
+    </div>
+    <div class="col-3"></div>
+    <div class="col-3"></div>
+</div>
+{% endblock %}

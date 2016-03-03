@@ -18,8 +18,8 @@ class DateTimeEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 def index(request):
-    topAsn = ASN.objects.order_by("number")
-    context = {"topAsn": topAsn}
+    monitoredAsn = ASN.objects.order_by("number")
+    context = {"monitoredAsn": monitoredAsn[:5], "nbMonitoredAsn": len(monitoredAsn)-5}
     return render(request, "reports/index.html", context)
 
 def search(request):
@@ -36,11 +36,11 @@ def search(request):
         return HttpResponseRedirect(reverse("reports:index"))
     
     asn = get_object_or_404(ASN, number=reqNumber)
-    return HttpResponseRedirect(reverse("reports:asnDetail", args=(asn.id,)))
+    return HttpResponseRedirect(reverse("reports:asnDetail", args=(asn.number,)))
 
 def congestionData(request):
     asn = get_object_or_404(ASN, number=request.GET["asn"])
-    data = Congestion.objects.filter(asn=asn.id)
+    data = Congestion.objects.filter(asn=asn.number)
     formatedData = {
             "x": list(data.values_list("timeBin", flat=True)),
             "y": list(data.values_list("magnitude", flat=True))
@@ -49,7 +49,7 @@ def congestionData(request):
 
 def forwardingData(request):
     asn = get_object_or_404(ASN, number=request.GET["asn"])
-    data = Forwarding.filter(asn=asn.id) 
+    data = Forwarding.objects.filter(asn=asn.number) 
     formatedData = {
             "x": list(data.values_list("timeBin", flat=True)),
             "y": list(data.values_list("magnitude", flat=True))
@@ -57,7 +57,12 @@ def forwardingData(request):
     return JsonResponse(formatedData, encoder=DateTimeEncoder) 
 
 
-class ASNView(generic.DetailView):
+class ASNDetail(generic.DetailView):
+    model = ASN
+    # template_name = "reports/asn_detail.html"
+
+
+class ASNList(generic.ListView):
     model = ASN
     # template_name = "reports/asn_detail.html"
 
