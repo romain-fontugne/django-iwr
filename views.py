@@ -3,8 +3,9 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.core import serializers
+from django.db.models import Avg
 
-from datetime import datetime
+from datetime import datetime, date
 import json
 
 from .models import ASN, Congestion, Forwarding
@@ -19,7 +20,14 @@ class DateTimeEncoder(json.JSONEncoder):
 
 def index(request):
     monitoredAsn = ASN.objects.order_by("number")
-    context = {"monitoredAsn": monitoredAsn[:5], "nbMonitoredAsn": len(monitoredAsn)-5}
+    topAsn = ASN.objects.annotate(score=Avg("congestion__magnitude")).order_by("-score")[:5]
+    ulLen = 5
+    if len(monitoredAsn)<15:
+        ulLen = 2 #len(monitoredAsn)/3
+
+    context = {"monitoredAsn0": monitoredAsn[:ulLen], "monitoredAsn1": monitoredAsn[ulLen:ulLen*2],
+            "monitoredAsn0": monitoredAsn[ulLen*2:ulLen*3],"nbMonitoredAsn": len(monitoredAsn)-5,
+            "topAsn": topAsn }
     return render(request, "reports/index.html", context)
 
 def search(request):
