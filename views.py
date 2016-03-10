@@ -26,7 +26,7 @@ def index(request):
         ulLen = 2 #len(monitoredAsn)/3
 
     context = {"monitoredAsn0": monitoredAsn[:ulLen], "monitoredAsn1": monitoredAsn[ulLen:ulLen*2],
-            "monitoredAsn0": monitoredAsn[ulLen*2:ulLen*3],"nbMonitoredAsn": len(monitoredAsn)-5,
+            "monitoredAsn2": monitoredAsn[ulLen*2:ulLen*3],"nbMonitoredAsn": len(monitoredAsn)-ulLen*3,
             "topAsn": topAsn }
     return render(request, "reports/index.html", context)
 
