@@ -44,7 +44,7 @@
 <script>
     function makeplot() {
         Plotly.newPlot("plotCongestion", []);
-        {% for asn in topAsn %}
+        {% for asn in topCongestion %}
         Plotly.d3.json("{% url "reports:congestionData" %}?asn={{ asn.number }}", function(data){ addPlotly(data, "plotCongestion", "AS{{ asn.number }}") } );
         {% endfor %}
     };

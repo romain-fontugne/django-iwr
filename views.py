@@ -3,9 +3,9 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.core import serializers
-from django.db.models import Avg
+from django.db.models import Avg, When, Sum, Case, FloatField
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import json
 
 from .models import ASN, Congestion, Forwarding
@@ -20,14 +20,26 @@ class DateTimeEncoder(json.JSONEncoder):
 
 def index(request):
     monitoredAsn = ASN.objects.order_by("number")
-    topAsn = ASN.objects.annotate(score=Avg("congestion__magnitude")).order_by("-score")[:5]
+
+    today = date.today()
+    if "today" in request.GET:
+        part = request.GET["today"].split("-")
+        today = date(int(part[0]), int(part[1]), int(part[2]))
+    limitDate = today-timedelta(days=7)
+    print(limitDate)
+    # TODO remove the following line (used only with test data)
+    limitDate = datetime(2015,1,1)
+
+    topCongestion = ASN.objects.filter(congestion__timebin__gt=limitDate).annotate(score=Sum("congestion__magnitude")).order_by("-score")[:5]
+
+    print(topCongestion)
     ulLen = 5
     if len(monitoredAsn)<15:
         ulLen = 2 #len(monitoredAsn)/3
 
     context = {"monitoredAsn0": monitoredAsn[:ulLen], "monitoredAsn1": monitoredAsn[ulLen:ulLen*2],
             "monitoredAsn2": monitoredAsn[ulLen*2:ulLen*3],"nbMonitoredAsn": len(monitoredAsn)-ulLen*3,
-            "topAsn": topAsn }
+            "topCongestion": topCongestion }
     return render(request, "reports/index.html", context)
 
 def search(request):
